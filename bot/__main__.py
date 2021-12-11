@@ -157,7 +157,6 @@ help_string_telegraph = f'''<br>
 <b>/{BotCommands.StatusCommand}</b>: Shows a status of all the downloads
 <br><br>
 <b>/{BotCommands.StatsCommand}</b>: Show Stats of the machine the bot is hosted on
-<b>/{BotCommands.UsageCommand}</b>: To see Heroku Dyno Stats (Owner only).
 '''
 
 help = telegraph.create_page(
@@ -187,8 +186,6 @@ help_string = f'''
 /{BotCommands.ShellCommand}: Run commands in Shell (Only Owner)
 
 /{BotCommands.ExecHelpCommand}: Get help for Executor module (Only Owner)
-
-/{BotCommands.UsageCommand}: To see Heroku Dyno Stats (Owner only).
 '''
 
 def bot_help(update, context):
@@ -229,9 +226,8 @@ botcmds = [
         (f'{BotCommands.RestartCommand}','Restart the bot'),
         (f'{BotCommands.LogCommand}','Get the bot Log'),
         (f'{BotCommands.HelpCommand}','Get detailed help')
-        (f'{Botcommands.HelpCommand}','To see Heroku Dyno Stats')
     ]
-    
+
 def main():
     # bot.set_my_commands(botcmds)
     fs_utils.start_cleanup()
