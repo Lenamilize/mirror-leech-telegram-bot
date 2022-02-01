@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # (c) YashDK [yash-dk@github]
 # Redesigned By - @bipuldey19 (https://github.com/SlamDevs/slam-mirrorbot/commit/1e572f4fa3625ecceb953ce6d3e7cf7334a4d542#diff-c3d91f56f4c5d8b5af3d856d15a76bd5f00aa38d712691b91501734940761bdd)
@@ -193,6 +194,23 @@ input[type="submit"]:hover, input[type="submit"]:focus{
     display: none;
 }
 
+#sticks {
+  margin: 0vh 1vw;
+  margin-bottom: 1vh;
+  padding: 1vh 3vw;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid rgba(255, 255, 255, 0.11);
+  border-radius: 20px;
+  background-color: #161b22;
+  align-items: center;
+}
+
+#sticks.stick {
+  position: sticky;
+  top: 0;
+  z-index: 10000;
+}
 </style>
 </head>
 <body>
@@ -212,8 +230,11 @@ input[type="submit"]:hover, input[type="submit"]:focus{
         <a href="https://t.me/anas_tayyar"><i class="fab fa-telegram"></i></a>
       </div>
     </header>
-    <section>
-      <h2 class="intro">Select the files you want to download</h2>
+    <div id="sticks">
+        <h4>Selected files: <b id="checked_files">0</b> of <b id="total_files">0</b></h4>
+        <h4>Selected files size: <b id="checked_size">0</b> of <b id="total_size">0</b></h4>
+    </div>
+      <section>
       <form action="{form_url}" method="POST">
        {My_content}
        <input type="submit" name="Select these files ;)">
@@ -222,6 +243,7 @@ input[type="submit"]:hover, input[type="submit"]:focus{
 
     <script>
       $(document).ready(function () {
+        docready();
         var tags = $("li").filter(function () {
           return $(this).find("ul").length !== 0;
         });
@@ -243,37 +265,37 @@ input[type="submit"]:hover, input[type="submit"]:focus{
       });
 
       if(document.getElementsByTagName("ul").length >= 10){
-      var labels = document.querySelectorAll("label");
-      //Shorting the file/folder names
-      labels.forEach(function (label) {
-        if (label.innerText.toString().split(" ").length >= 6) {
-          let FirstPart = label.innerText
-            .toString()
-            .split(" ")
-            .slice(0, 3)
-            .join(" ");
-          let SecondPart = label.innerText
-            .toString()
-            .split(" ")
-            .splice(-3)
-            .join(" ");
-          label.innerText = `${FirstPart}... ${SecondPart}`;
-        }
-        if (label.innerText.toString().split(".").length >= 6) {
-          let first = label.innerText
-            .toString()
-            .split(".")
-            .slice(0, 3)
-            .join(" ");
-          let second = label.innerText
-            .toString()
-            .split(".")
-            .splice(-3)
-            .join(".");
-          label.innerText = `${first}... ${second}`;
-        }
-      });
-     }
+        var labels = document.querySelectorAll("label");
+        //Shorting the file/folder names
+        labels.forEach(function (label) {
+            if (label.innerText.toString().split(" ").length >= 9) {
+                let FirstPart = label.innerText
+                    .toString()
+                    .split(" ")
+                    .slice(0, 5)
+                    .join(" ");
+                let SecondPart = label.innerText
+                    .toString()
+                    .split(" ")
+                    .splice(-5)
+                    .join(" ");
+                label.innerText = `${FirstPart}... ${SecondPart}`;
+            }
+            if (label.innerText.toString().split(".").length >= 9) {
+                let first = label.innerText
+                    .toString()
+                    .split(".")
+                    .slice(0, 5)
+                    .join(" ");
+                let second = label.innerText
+                    .toString()
+                    .split(".")
+                    .splice(-5)
+                    .join(".");
+                label.innerText = `${first}... ${second}`;
+            }
+        });
+    }
     </script>
 
 <script>
@@ -317,6 +339,69 @@ $('input[type="checkbox"]').change(function(e) {
   }
   checkSiblings(container);
 });
+</script>
+<script>
+    function docready () {
+        $("label[for^='filenode_']").css("cursor", "pointer");
+        $("label[for^='filenode_']").click(function () {
+            $(this).prev().click();
+        });
+        checked_size();
+        checkingfiles();
+        var total_files = $("label[for^='filenode_']").length;
+        $("#total_files").text(total_files);
+        var total_size = 0;
+        var ffilenode = $("label[for^='filenode_']");
+        ffilenode.each(function () {
+            var size = parseFloat($(this).data("size"));
+            total_size += size;
+            $(this).append(" - " + humanFileSize(size));
+        });
+        $("#total_size").text(humanFileSize(total_size));
+    };
+    function checked_size() {
+        var checked_size = 0;
+        var checkedboxes = $("input[name^='filenode_']:checked");
+        checkedboxes.each(function () {
+            var size = parseFloat($(this).data("size"));
+            checked_size += size;
+        });
+        $("#checked_size").text(humanFileSize(checked_size));
+    }
+    function checkingfiles() {
+        var checked_files = $("input[name^='filenode_']:checked").length;
+        $("#checked_files").text(checked_files);
+    }
+    $("input[name^='foldernode_']").change(function () {
+        checkingfiles();
+        checked_size();
+    });
+    $("input[name^='filenode_']").change(function () {
+        checkingfiles();
+        checked_size();
+    });
+    function humanFileSize(size) {
+        var i = -1;
+        var byteUnits = [' kB', ' MB', ' GB', ' TB', 'PB', 'EB', 'ZB', 'YB'];
+        do {
+            size = size / 1024;
+            i++;
+        } while (size > 1024);
+        return Math.max(size, 0).toFixed(1) + byteUnits[i];
+    }
+    function sticking() {
+        var window_top = $(window).scrollTop();
+        var div_top = $('.brand').offset().top;
+        if (window_top > div_top) {
+            $('#sticks').addClass('stick');
+        } else {
+            $('#sticks').removeClass('stick');
+        }
+    }
+    $(function () {
+        $(window).scroll(sticking);
+        sticking();
+    });
 </script>
 </body>
 </html>
@@ -588,7 +673,6 @@ async def list_torrent_contents(request):
 
     cont = ["", 0]
     nodes.create_list(par, cont)
-
     rend_page = page.replace("{My_content}", cont[0])
     rend_page = rend_page.replace("{form_url}", f"/app/files/{torr}?pin_code={pincode}")
     client.auth_log_out()
@@ -633,6 +717,7 @@ async def re_verfiy(paused, resumed, client, torr):
             LOGGER.error("Errored in reverification resumed")
         k += 1
         if k > 5:
+            client.auth_log_out()
             return False
     client.auth_log_out()
     LOGGER.info("Verified")
